@@ -1,0 +1,29 @@
+language: python
+python:
+- '2.7'
+- '3.4'
+- pypy
+before_install:
+- sudo apt-get install software-properties-common
+- sudo apt-get update -qq
+- sudo sh -c "echo 'deb http://dev.monetdb.org/downloads/deb/ precise monetdb' > /etc/apt/sources.list.d/monetdb.list"
+- wget --output-document=- http://dev.monetdb.org/downloads/MonetDB-GPG-KEY | sudo
+  apt-key add -
+- sudo apt-get update -qq
+- sudo apt-get install -qq pyrap monetdb5-sql monetdb-client
+- sudo sh -c "echo 'STARTUP=yes\nDBFARM=/var/lib/monetdb\n' > /etc/default/monetdb5-sql"
+- sudo service monetdb5-sql start
+- sudo monetdb create demo
+- sudo monetdb release demo
+- sudo monetdbd set control=yes /var/lib/monetdb
+- sudo monetdbd set passphrase=testdb /var/lib/monetdb
+script: py.test
+deploy:
+  provider: pypi
+  user: gijzelaerr
+  password:
+    secure: yn+uJsYn6uPl22mlVG0p0MYj7CylCJdBXGC3UKO4kbOKuR2Npf94MXl6y00tFpFtQh4r9BomEOXrpfVS6oDz60rqq1JKPVNC4Mxqp6jU3KJnxphoMwJibTU6fw0tVaFSY/ZtRhKjtZ5QO9Ea6+ukVSrSGHeQkknYTrcm9ORfqh0=
+  on:
+    tags: true
+env:
+  global:
