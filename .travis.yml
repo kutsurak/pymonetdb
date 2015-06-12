@@ -22,8 +22,6 @@ deploy:
   provider: pypi
   user: gijzelaerr
   password:
-    secure: yn+uJsYn6uPl22mlVG0p0MYj7CylCJdBXGC3UKO4kbOKuR2Npf94MXl6y00tFpFtQh4r9BomEOXrpfVS6oDz60rqq1JKPVNC4Mxqp6jU3KJnxphoMwJibTU6fw0tVaFSY/ZtRhKjtZ5QO9Ea6+ukVSrSGHeQkknYTrcm9ORfqh0=
+    secure: I4bmfyVLt/A5bvP6AmucK6YCWcaiMtfuF3HZL2snhddqJhnBRQkO7MhgZ5xk3Fdheq6/Rlwk8obsMdGsKKPzGx6bHvCE5RXTIRhZNCrotwpdU0FNg0fBUcmOS981YaHxpZEDmBD7KjaZdOo5SpTyAyLp7rUl4RVvDu9vqICLlGk=
   on:
     tags: true
-env:
-  global:
