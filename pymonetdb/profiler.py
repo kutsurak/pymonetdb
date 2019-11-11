@@ -18,6 +18,7 @@ class ProfilerConnection:
         self._heartbeat = 0
         self._buffer = ""
         self._objects = list()
+        self._connected = False
 
     def connect(self, database, username="monetdb", password="monetdb", hostname=None, port=50000, heartbeat=0):
         """ Open a profiler connection to a running MonetDB server """
@@ -25,11 +26,20 @@ class ProfilerConnection:
         self._mapi.connect(database, username, password, "mal", hostname, port)
         self._mapi.cmd("profiler.setheartbeat(%d);\n" % heartbeat)
         self._mapi.cmd("profiler.openstream(3);\n")
+        self._connected = True
 
     def read_object(self):
         """ Read one JSON Object from this profiler connection. """
+        if not self._connected:
+            raise Exception("not connected")
         self._buffer = self._mapi._getblock()
         while not self._buffer.endswith("}\n"):
             self._buffer += self._mapi._getblock()
 
         return self._buffer[:-1]
+
+    def disconnect(self):
+        """ Close this profiler connection. """
+        if not self._connected:
+            raise Exception("not connected")
+        self._mapi.disconnect()
