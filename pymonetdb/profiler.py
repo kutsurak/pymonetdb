@@ -25,7 +25,7 @@ class ProfilerConnection:
         self._heartbeat = heartbeat
         self._mapi.connect(database, username, password, "mal", hostname, port)
         self._mapi.cmd("profiler.setheartbeat(%d);\n" % heartbeat)
-        self._mapi.cmd("profiler.openstream(3);\n")
+        self._mapi.cmd("profiler.openstream();\n")
         self._connected = True
 
     def read_object(self):
