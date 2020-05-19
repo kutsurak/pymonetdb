@@ -8,7 +8,7 @@ This implements a connection to the profiler.
 """
 
 from pymonetdb import mapi
-from pymonetdb.exceptions import OperationalError
+from pymonetdb.exceptions import OperationalError, ProgrammingError
 
 
 class ProfilerConnection(object):
@@ -22,20 +22,41 @@ class ProfilerConnection(object):
         self._buffer = ""
         self._objects = list()
 
+    def _command(self, operation):
+        if self._mapi.state != mapi.STATE_READY:
+            raise (ProgrammingError, "Not connected")
+        self._mapi._putblock(operation)
+
+    def _response(self):
+        r = self._mapi._getblock()
+
+        if not r or len(r) == 0:
+            pass # nothing to do
+        elif r.startswith("{") and len(self._buffer) == 0:
+            self._buffer = r
+        else:
+            raise ProgrammingError("bad response when connecting to the profiler: %s" % r)
+
     def connect(self, database, username="monetdb", password="monetdb", hostname=None, port=50000, heartbeat=0):
         self._heartbeat = heartbeat
         self._mapi.connect(database, username, password, "mal", hostname, port)
-        self._mapi.cmd("profiler.setheartbeat(%d);\n" % heartbeat)
+        self._command("profiler.setheartbeat(%d);\n" % heartbeat)
+        self._response()
         try:
-            self._mapi.cmd("profiler.openstream();\n")
+            self._command("profiler.openstream();\n")
+            self._response()
         except OperationalError as e:
             # We might be talking to an older version of MonetDB. Try connecting
             # the old way.
-            self._mapi.cmd("profiler.openstream(3);\n")
+            self._command("profiler.openstream(3);\n")
+            self._response()
 
     def read_object(self):
-        self._buffer = self._mapi._getblock()
+        if len(self._buffer) == 0:
+            self._buffer = self._mapi._getblock()
         while not self._buffer.endswith("}\n"):
             self._buffer += self._mapi._getblock()
 
-        return self._buffer[:-1]
+        r = self._buffer[:-1]
+        self._buffer = ""
+        return r
