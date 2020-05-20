@@ -7,8 +7,11 @@
 This implements a connection to the profiler.
 """
 
+import logging
 from pymonetdb import mapi
 from pymonetdb.exceptions import OperationalError, ProgrammingError
+
+LOGGER = logging.getLogger(__name__)
 
 
 class ProfilerConnection(object):
@@ -48,6 +51,7 @@ class ProfilerConnection(object):
         except OperationalError as e:
             # We might be talking to an older version of MonetDB. Try connecting
             # the old way.
+            LOGGER.warning("Connection failed. Attempting to connect using the old API.")
             self._command("profiler.openstream(3);\n")
             self._response()
 
